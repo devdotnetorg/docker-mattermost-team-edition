@@ -2,7 +2,7 @@ FROM alpine:3.10
 
 # Some ENV variables
 ENV PATH="/mattermost/bin:${PATH}"
-ENV MM_VERSION=5.14.1
+ENV MM_VERSION=5.18.0
 
 # Build argument to set Mattermost edition ==> team
 ARG edition=team
@@ -18,6 +18,7 @@ RUN apk add --no-cache \
 	jq \
 	libc6-compat \
 	libffi-dev \
+	libcap \
 	linux-headers \
 	mailcap \
 	netcat-openbsd \
@@ -34,7 +35,8 @@ RUN mkdir -p /mattermost/data /mattermost/plugins /mattermost/client/plugins \
     && rm -rf /mattermost/config/config.json \
     && addgroup -g ${PGID} mattermost \
     && adduser -D -u ${PUID} -G mattermost -h /mattermost -D mattermost \
-    && chown -R mattermost:mattermost /mattermost /config.json.save /mattermost/plugins /mattermost/client/plugins
+    && chown -R mattermost:mattermost /mattermost /config.json.save /mattermost/plugins /mattermost/client/plugins \
+    && setcap cap_net_bind_service=+ep /mattermost/bin/mattermost
 
 # Configure entrypoint and command
 COPY entrypoint.sh /
